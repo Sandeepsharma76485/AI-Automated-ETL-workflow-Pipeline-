@@ -1,0 +1,25 @@
+# docker compose up --build
+# first run only: docker compose exec ollama ollama pull llama3.1:8b
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes: [ollama:/root/.ollama]
+    # Uncomment for NVIDIA GPU acceleration
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices: [{ driver: nvidia, count: all, capabilities: [gpu] }]
+
+  app:
+    build: .
+    ports: ["8501:8501"]
+    environment:
+      LLM_PROVIDER: ollama
+      LLM_BASE_URL: http://ollama:11434
+      LLM_MODEL: llama3.1:8b
+    volumes: [./data:/app/data]
+    depends_on: [ollama]
+
+volumes:
+  ollama:
